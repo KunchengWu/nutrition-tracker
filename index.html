@@ -75,27 +75,27 @@ function reviewSave(){localStorage.setItem(REVIEW_KEY,JSON.stringify(reviews))}
 function markStatus(i,status){let f=getFoods()[i],old=info(f);reviews[f[0]]={...old,status};reviewSave();render()}
 function setBasis(i,basis){let f=getFoods()[i],old=info(f);reviews[f[0]]={...old,weightMode:basis};reviewSave();render()}
 function setYield(i,val){let f=getFoods()[i],old=info(f);reviews[f[0]]={...old,yield:Math.max(0,Math.min(1,(Number(val)||0)/100))};reviewSave();render()}
-function edit(i,key,val){let a=getFoods().map(f=>[...f]);let f=a[i],m=info(f);if(key===1&&m.weightMode==='whole'){f[1]=Math.max(0,Number(val)||0)*m.yield}else{f[key]=key===0?val:Math.max(0,Number(val)||0)}drafts[date+'|'+meal]=a;render()}
+function edit(i,key,val){const timeField=$('mealActualTime');if(timeField)mealTimeDrafts[date+'|'+meal]=timeField.value;let a=getFoods().map(f=>[...f]);let f=a[i],m=info(f);if(key===1&&m.weightMode==='whole'){f[1]=Math.max(0,Number(val)||0)*m.yield}else{f[key]=key===0?val:Math.max(0,Number(val)||0)}drafts[date+'|'+meal]=a;render()}
 function getFoods(){return drafts[date+'|'+meal]||db[date]?.[meal]||PLAN[indexDay(date)][meal].map(f=>[...f])}
-function saveFoods(a){persistMealTime();db[date]??={};db[date][meal]=a.map(f=>[...f]);delete drafts[date+'|'+meal];localStorage.setItem(K,JSON.stringify(db));render()}
-function removeFood(i){drafts[date+'|'+meal]=getFoods().filter((_,j)=>i!==j);render()}
+function saveFoods(a){if(!persistMealTime())return;db[date]??={};db[date][meal]=a.map(f=>[...f]);delete drafts[date+'|'+meal];localStorage.setItem(K,JSON.stringify(db));render()}
+function removeFood(i){const timeField=$('mealActualTime');if(timeField)mealTimeDrafts[date+'|'+meal]=timeField.value;drafts[date+'|'+meal]=getFoods().filter((_,j)=>i!==j);render()}
 
 const VERIFIED_PANTRY=[["Oikos Triple Zero Vanilla 香草酸奶",170,58.823529,10,4.117647,0],["Premier Protein 巧克力杏仁麦片",42,428.57142857142856,47.61904761904761,33.33333333333333,11.904761904761903],["Kroger CARBmaster Original Fat Free 牛奶",240,33.33333333333333,5.416666666666667,2.9166666666666665,0],["Simple Truth 有机核桃",30,666.6666666666667,16.666666666666664,13.333333333333334,66.66666666666666],["Simple Truth 有机奇亚籽",30,500,20,33.33333333333333,33.33333333333333],["NatureSweet Cherubs 小番茄",100,18,0.9,3.9,0.2]];
 const FOOD_LIBRARY=(()=>{const m=new Map();for(const day of PLAN)for(const foods of day)for(const f of foods)if(!m.has(f[0]))m.set(f[0],[...f]);for(const f of Object.values(XPRE))if(f.slice(1).every(x=>typeof x==='number')&&!m.has(f[0]))m.set(f[0],[f[0],100,...f.slice(1)]);for(const f of VERIFIED_PANTRY)m.set(f[0],[...f]);return Array.from(m.values()).sort((a,b)=>a[0].localeCompare(b[0],'zh-CN'))})();
 function libraryOptions(){return '<option value="">从已有食材中选择…</option>'+FOOD_LIBRARY.map((f,i)=>'<option value="'+i+'">'+esc(f[0])+'（'+(info(f).status==='verified'?'已核对':info(f).status==='standard'?'标准估算':'待核对')+'）</option>').join('')}
-function addFood(){const id=$('mealLibrary')?.value,f=id!==''?FOOD_LIBRARY[Number(id)]:null;if(!f){alert('请先从下拉菜单中选择一个食材。新产品可以先发包装照片，以便核对后加入食材库。');return}const g=Number($('mealLibGrams')?.value);if(!Number.isFinite(g)||g<=0){alert('请填写大于0的实际可食重量');return}drafts[date+'|'+meal]=[...getFoods(),[f[0],g,...f.slice(2)]];render()}
+function addFood(){const timeField=$('mealActualTime');if(timeField)mealTimeDrafts[date+'|'+meal]=timeField.value;const id=$('mealLibrary')?.value,f=id!==''?FOOD_LIBRARY[Number(id)]:null;if(!f){alert('请先从下拉菜单中选择一个食材。新产品可以先发包装照片，以便核对后加入食材库。');return}const g=Number($('mealLibGrams')?.value);if(!Number.isFinite(g)||g<=0){alert('请填写大于0的实际可食重量');return}drafts[date+'|'+meal]=[...getFoods(),[f[0],g,...f.slice(2)]];render()}
 const MT_KEY='nutrition-actual-meal-times-v1';let mealTimes={};try{mealTimes=JSON.parse(localStorage.getItem(MT_KEY)||'{}')}catch{};let mealTimeDrafts={};
 function currentHHMM(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
-function mealTimeValue(){return mealTimeDrafts[date+'|'+meal]??mealTimes[date]?.[meal]??currentHHMM()}
+function mealTimeValue(){const key=date+'|'+meal;if(mealTimeDrafts[key]!==undefined)return mealTimeDrafts[key];if(mealTimes[date]&&mealTimes[date][meal]!==undefined)return mealTimes[date][meal];return db[date]?.[meal]?'':currentHHMM()}
 function mealTimeChanged(v){mealTimeDrafts[date+'|'+meal]=v}
-function persistMealTime(){mealTimes[date]??={};mealTimes[date][meal]=$('mealActualTime')?.value||mealTimeValue();delete mealTimeDrafts[date+'|'+meal];localStorage.setItem(MT_KEY,JSON.stringify(mealTimes))}
+function persistMealTime(){const key=date+'|'+meal;const value=mealTimeDrafts[key]??$('mealActualTime')?.value??'';if(!/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value)){alert('请填写实际进食时间（HH:MM）。旧餐次也可以补录。');return false}mealTimes[date]??={};mealTimes[date][meal]=value;delete mealTimeDrafts[key];localStorage.setItem(MT_KEY,JSON.stringify(mealTimes));return true}
 function render(){let d=db[date]||{},actual=entries(date);
 $('todayLabel').textContent='📅 '+date+' · '+['周一','周二','周三','周四','周五','周六','周日'][indexDay(date)];
 $('dailyStats').innerHTML=stats(actual);
 $('targetText').innerHTML='初始参考目标：'+TARGET.join(' / ')+'（kcal / 蛋白质g / 碳水g / 脂肪g） · 已记录 '+Object.keys(d).length+'/4 餐。增肌热量仍待校准。';
 $('tabs').innerHTML=NAMES.map((n,i)=>'<button class="pill '+(i===meal?'on':'')+'" onclick="setMeal('+i+')">'+n+(d[i]?' ✓':'')+'</button>').join('');
 let a=getFoods(),m=macros(a),pending=a.filter(f=>info(f).status!=='verified').length;
-$('editor').innerHTML='<p class="hint muted">'+(drafts[date+'|'+meal]?'✏️ 有未确认的编辑':d[meal]?'✅ 已记录实际摄入':'📋 计划餐（尚未计入已吃）')+'</p><div class="row"><div><label>实际进食时间</label><input id="mealActualTime" type="time" value="'+mealTimeValue()+'" onchange="mealTimeChanged(this.value)"></div><span class="hint muted">原建议时间 '+TIMES[meal]+'；可自由改为实际吃饭时间。'+(d[meal]&&!mealTimes[date]?.[meal]?'此旧记录的进食时间尚未记录。':'')+'</span></div><div class="stats">'+stats(m)+'</div><p class="hint muted">📍 本餐还有 '+pending+' 项食材营养未完成包装/来源核对。“标准估算”不等于精确实测。菜单营养仍是测试版。</p>'+
+$('editor').innerHTML='<p class="hint muted">'+(drafts[date+'|'+meal]?'✏️ 有未确认的编辑':d[meal]?'✅ 已记录实际摄入':'📋 计划餐（尚未计入已吃）')+'</p><div class="row"><div><label>实际进食时间</label><input id="mealActualTime" type="time" value="'+mealTimeValue()+'" oninput="mealTimeChanged(this.value)" onchange="mealTimeChanged(this.value)"></div><span class="hint muted">原建议时间 '+TIMES[meal]+'；可自由改为实际吃饭时间。'+(d[meal]&&!mealTimes[date]?.[meal]?'此旧记录的时间尚未保存，请补录。':'')+'</span></div><div class="stats">'+stats(m)+'</div><p class="hint muted">📍 本餐还有 '+pending+' 项食材营养未完成包装/来源核对。“标准估算”不等于精确实测。菜单营养仍是测试版。</p>'+
 a.map((f,i)=>{let r=info(f),badge=r.status==='verified'?'✅ 已核对':r.status==='standard'?'◯ 标准估算':'⚠ 待核对',v=r.weightMode==='whole'?round(f[1]/(r.yield||1)):f[1];
 return '<div class="food"><div class="row"><strong>'+esc(f[0])+'</strong><span class="hint">'+badge+'</span></div>'+
 '<p class="hint muted">'+esc(r.basis)+' · '+esc(r.note)+'</p>'+
