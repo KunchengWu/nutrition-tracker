@@ -43,7 +43,7 @@ function setDay(v){date=v;$('date').value=v;meal=0;if($('xDate'))$('xDate').valu
 function esc(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
 
 const REVIEW_KEY='nutrition-food-review-v2';let reviews={};try{reviews=JSON.parse(localStorage.getItem(REVIEW_KEY)||'{}')}catch{}
-let drafts={};
+const DRAFT_KEY='nutrition-meal-drafts-v1';let drafts={};try{drafts=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}')}catch{};function saveDrafts(){localStorage.setItem(DRAFT_KEY,JSON.stringify(drafts))}
 const FOOD_HINTS={
 'Hershey\'s Milk Chocolate Snack Size':{status:'verified',basis:'2块（26g）包装净重',note:'用户标签：每26g 130kcal；P2/C16/F7，饱和脂肪4.5g，添加糖13g。',yield:1},
 'Planters Honey Roasted Whole Cashews':{status:'verified',basis:'去壳即食28g',note:'用户标签：每28g 160kcal；P4/C11/F11，添加糖4g，钠110mg。',yield:1},
@@ -66,6 +66,7 @@ const FOOD_HINTS={
 '西冷牛排':{status:'review',basis:'生重',note:'核对具体部位、脂肪修剪程度',yield:1},
 '瘦牛肉':{status:'review',basis:'生重',note:'不同部位脂肪差异较大',yield:1},
 '三文鱼':{status:'review',basis:'生鱼肉可食重量',note:'核对养殖/野生、皮和骨是否计入',yield:1},
+'生白米（干重）':{status:'standard',basis:'下锅前干米重量',note:'每100g约365kcal、蛋白质7.1g、碳水80g；煮饭吸水不增加热量',yield:1},
 '去皮鸡腿肉':{status:'review',basis:'去皮去骨生重',note:'不同脂肪修剪程度影响营养',yield:1},
 '鸡小腿（生带骨带皮，连皮吃）':{status:'standard',basis:'生重含骨含皮；按可食率68%估算肉与皮',note:'649g生带骨约折算441g肉+皮；约700kcal、蛋白质80g、脂肪40g。实际以吃完后骨头重量校正',yield:.68,weightMode:'whole'}
 };
@@ -76,16 +77,16 @@ function reviewSave(){localStorage.setItem(REVIEW_KEY,JSON.stringify(reviews))}
 function markStatus(i,status){let f=getFoods()[i],old=info(f);reviews[f[0]]={...old,status};reviewSave();render()}
 function setBasis(i,basis){let f=getFoods()[i],old=info(f);reviews[f[0]]={...old,weightMode:basis};reviewSave();render()}
 function setYield(i,val){let f=getFoods()[i],old=info(f);reviews[f[0]]={...old,yield:Math.max(0,Math.min(1,(Number(val)||0)/100))};reviewSave();render()}
-function edit(i,key,val){const timeField=$('mealActualTime');if(timeField)mealTimeDrafts[date+'|'+meal]=timeField.value;let a=getFoods().map(f=>[...f]);let f=a[i],m=info(f);if(key===1&&m.weightMode==='whole'){f[1]=Math.max(0,Number(val)||0)*m.yield}else{f[key]=key===0?val:Math.max(0,Number(val)||0)}drafts[date+'|'+meal]=a;render()}
+function edit(i,key,val){const timeField=$('mealActualTime');if(timeField)mealTimeDrafts[date+'|'+meal]=timeField.value;let a=getFoods().map(f=>[...f]);let f=a[i],m=info(f);if(key===1&&m.weightMode==='whole'){f[1]=Math.max(0,Number(val)||0)*m.yield}else{f[key]=key===0?val:Math.max(0,Number(val)||0)}drafts[date+'|'+meal]=a;saveDrafts();render()}
 function getFoods(){return drafts[date+'|'+meal]||db[date]?.[meal]||PLAN[indexDay(date)][meal].map(f=>[...f])}
-function saveFoods(a){if(!persistMealTime())return;db[date]??={};db[date][meal]=a.map(f=>[...f]);delete drafts[date+'|'+meal];localStorage.setItem(K,JSON.stringify(db));render()}
-function removeFood(i){const timeField=$('mealActualTime');if(timeField)mealTimeDrafts[date+'|'+meal]=timeField.value;drafts[date+'|'+meal]=getFoods().filter((_,j)=>i!==j);render()}
+function saveFoods(a){if(!persistMealTime())return;db[date]??={};db[date][meal]=a.map(f=>[...f]);delete drafts[date+'|'+meal];saveDrafts();localStorage.setItem(K,JSON.stringify(db));render()}
+function removeFood(i){const timeField=$('mealActualTime');if(timeField)mealTimeDrafts[date+'|'+meal]=timeField.value;drafts[date+'|'+meal]=getFoods().filter((_,j)=>i!==j);saveDrafts();render()}
 
-const VERIFIED_PANTRY=[["Oikos Triple Zero Vanilla 香草酸奶",170,58.823529,10,4.117647,0],["Premier Protein 巧克力杏仁麦片",42,428.57142857142856,47.61904761904761,33.33333333333333,11.904761904761903],["Kroger CARBmaster Original Fat Free 牛奶",240,33.33333333333333,5.416666666666667,2.9166666666666665,0],["Simple Truth 有机核桃",30,666.6666666666667,16.666666666666664,13.333333333333334,66.66666666666666],["Simple Truth 有机奇亚籽",30,500,20,33.33333333333333,33.33333333333333],["NatureSweet Cherubs 小番茄",100,18,0.9,3.9,0.2]];
+const VERIFIED_PANTRY=[["生白米（干重）",135,365,7.1,80,0.7],"Oikos Triple Zero Vanilla 香草酸奶",170,58.823529,10,4.117647,0],["Premier Protein 巧克力杏仁麦片",42,428.57142857142856,47.61904761904761,33.33333333333333,11.904761904761903],["Kroger CARBmaster Original Fat Free 牛奶",240,33.33333333333333,5.416666666666667,2.9166666666666665,0],["Simple Truth 有机核桃",30,666.6666666666667,16.666666666666664,13.333333333333334,66.66666666666666],["Simple Truth 有机奇亚籽",30,500,20,33.33333333333333,33.33333333333333],["NatureSweet Cherubs 小番茄",100,18,0.9,3.9,0.2]];
 const FOOD_LIBRARY=(()=>{const m=new Map();for(const day of PLAN)for(const foods of day)for(const f of foods)if(!m.has(f[0]))m.set(f[0],[...f]);for(const f of Object.values(XPRE))if(f.slice(1).every(x=>typeof x==='number')&&!m.has(f[0]))m.set(f[0],[f[0],100,...f.slice(1)]);for(const f of VERIFIED_PANTRY)m.set(f[0],[...f]);m.set("鸡小腿（生带骨带皮，连皮吃）",["鸡小腿（生带骨带皮，连皮吃）",649,159,18.2,0,9.1]);return Array.from(m.values()).sort((a,b)=>a[0].localeCompare(b[0],'zh-CN'))})();
 function libraryOptions(){return '<option value="">从已有食材中选择…</option>'+FOOD_LIBRARY.map((f,i)=>'<option value="'+i+'">'+esc(f[0])+'（'+(info(f).status==='verified'?'已核对':info(f).status==='standard'?'标准估算':'待核对')+'）</option>').join('')}
 function libraryWeightHint(){const f=FOOD_LIBRARY[Number($('mealLibrary')?.value)];if(!f||$('mealLibrary').value==='')return;const w=info(f);$('mealLibWeightLabel').textContent=w.weightMode==='whole'?'生重（含骨含皮，g；按'+Math.round(w.yield*100)+'%可食率换算）':'实际可食重量（g）';$('mealLibGrams').value=String(f[1]);}
-function addFood(){const timeField=$('mealActualTime');if(timeField)mealTimeDrafts[date+'|'+meal]=timeField.value;const id=$('mealLibrary')?.value,f=id!==''?FOOD_LIBRARY[Number(id)]:null;if(!f){alert('请先从下拉菜单中选择一个食材。新产品可以先发包装照片，以便核对后加入食材库。');return}const g=Number($('mealLibGrams')?.value);if(!Number.isFinite(g)||g<=0){alert('请填写大于0的实际可食重量');return}const w=info(f);drafts[date+'|'+meal]=[...getFoods(),[f[0],w.weightMode==='whole'?g*w.yield:g,...f.slice(2)]];render()}
+function addFood(){const timeField=$('mealActualTime');if(timeField)mealTimeDrafts[date+'|'+meal]=timeField.value;const id=$('mealLibrary')?.value,f=id!==''?FOOD_LIBRARY[Number(id)]:null;if(!f){alert('请先从下拉菜单中选择一个食材。新产品可以先发包装照片，以便核对后加入食材库。');return}const g=Number($('mealLibGrams')?.value);if(!Number.isFinite(g)||g<=0){alert('请填写大于0的实际可食重量');return}const w=info(f);drafts[date+'|'+meal]=[...getFoods(),[f[0],w.weightMode==='whole'?g*w.yield:g,...f.slice(2)]];saveDrafts();render()}
 const MT_KEY='nutrition-actual-meal-times-v1';let mealTimes={};try{mealTimes=JSON.parse(localStorage.getItem(MT_KEY)||'{}')}catch{};let mealTimeDrafts={};
 function currentHHMM(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 function mealTimeValue(){const key=date+'|'+meal;if(mealTimeDrafts[key]!==undefined)return mealTimeDrafts[key];if(mealTimes[date]&&mealTimes[date][meal]!==undefined)return mealTimes[date][meal];return db[date]?.[meal]?'':currentHHMM()}
