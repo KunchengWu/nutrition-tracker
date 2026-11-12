@@ -1,7 +1,13 @@
 name = "nutrition-tracker"
 main = "sync/worker.js"
 compatibility_date = "2026-11-10"
+previews_enabled = false
 
 [assets]
 directory = "."
 run_worker_first = ["/api/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nutrition-tracker-db"
+database_id = "e616e619-ece3-404a-8d55-67b099628e9a"
