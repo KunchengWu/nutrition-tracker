@@ -13,7 +13,7 @@
 <div class="stats"><div><label>kcal/100g</label><input id="xKcal" type="number" min="0" step=".1"></div><div><label>蛋白质/100g</label><input id="xP" type="number" min="0" step=".1"></div><div><label>碳水/100g</label><input id="xC" type="number" min="0" step=".1"></div><div><label>脂肪/100g</label><input id="xF" type="number" min="0" step=".1"></div></div>
 <label>备注（可选）</label><input id="xNote" placeholder="例如 睡前加餐">
 <p class="hint muted">单位为每100g，优先使用实际包装营养标签。毫升与克仅能近似换算。带皮/带壳应按可食重量记录。</p>
-<button class="btn" style="width:100%" onclick="xAdd()">＋ 记录这次进食</button><p id="xMsg" class="hint muted"></p><h2>选定日期的额外进食</h2><div id="xList"></div></div><div class="card"><h2>7 天饮食总结</h2><div id="weekly"></div><div class="flex"><button class="btn light" onclick="downloadData()">导出 JSON 备份</button><button class="btn light" onclick="document.getElementById('file').click()">导入备份</button><input id="file" type="file" accept="application/json" style="display:none" onchange="importData(event)"></div><button class="btn light" style="width:100%;margin-top:9px" onclick="copySummary()">复制给 ChatGPT 做营养分析</button></div><div class="card hint muted">数据仅保存在当前浏览器的本地存储中，不会自动上传 GitHub。请定期导出备份。所有营养系数为每100g粗略估算；生熟重和品牌标签可能影响结果。未填写的餐次不会被计入已摄入。</div></main><script>
+<button class="btn" style="width:100%" onclick="xAdd()">＋ 记录这次进食</button><p id="xMsg" class="hint muted"></p><h2>选定日期的额外进食</h2><div id="xList"></div></div><div class="card"><h2>7 天饮食总结</h2><div id="weekly"></div><div class="flex"><button class="btn light" onclick="downloadData()">导出 JSON 备份</button><button class="btn light" onclick="document.getElementById('file').click()">导入备份</button><input id="file" type="file" accept="application/json" style="display:none" onchange="importData(event)"></div><button class="btn light" style="width:100%;margin-top:9px" onclick="copySummary()">复制给 ChatGPT 做营养分析</button></div><div class="card hint muted">记录先保存在当前浏览器。连接云同步后可同步到你的 Cloudflare 数据库。请定期导出备份。所有营养系数为每100g粗略估算；生熟重和品牌标签可能影响结果。未填写的餐次不会被计入已摄入。</div></main><script>
 const PLAN=[[[["Oikos 香草酸奶",100,58.823529,10,4.117647,0],["CARBmaster 牛奶",200,33.333333,5.416667,2.916667,0],["Premier Protein 麦片",42,428.571429,47.619048,33.333333,11.904762],["奇亚籽",12,500,20,33.333333,33.333333],["香蕉",100,89,1.1,22.8,0.3],["蓝莓",80,57,0.7,14.5,0.3],["小番茄",100,18,0.9,3.9,0.2],["核桃",15,666.666667,16.666667,13.333333,66.666667]],[["鸡胸肉",150,165,31,0,3.6],["熟米饭",300,130,2.7,28,0.3],["西兰花",200,34,2.8,7,0.4],["胡萝卜",100,41,1,10,0.2],["橄榄油",12,884,0,0,100]],[["全麦面包",80,250,12,44,4],["香蕉",100,89,1.1,22.8,0.3],["花生酱",15,590,25,20,50]],[["三文鱼",170,208,20,0,13],["土豆",350,77,2,17,0.1],["菠菜",150,23,2.9,3.6,0.4],["蘑菇",150,22,3.1,3.3,0.3],["橄榄油",10,884,0,0,100],["猕猴桃",100,61,1.1,15,0.5]]],[[["Oikos 香草酸奶",100,58.823529,10,4.117647,0],["CARBmaster 牛奶",200,33.333333,5.416667,2.916667,0],["Premier Protein 麦片",42,428.571429,47.619048,33.333333,11.904762],["奇亚籽",12,500,20,33.333333,33.333333],["香蕉",100,89,1.1,22.8,0.3],["蓝莓",80,57,0.7,14.5,0.3],["小番茄",100,18,0.9,3.9,0.2],["核桃",15,666.666667,16.666667,13.333333,66.666667]],[["瘦牛排",160,165,23,0,8],["熟米饭",260,130,2.7,28,0.3],["彩椒",150,31,1,6,0.3],["西葫芦",150,17,1.2,3,0.3],["橄榄油",12,884,0,0,100]],[["全麦面包",80,250,12,44,4],["苹果",180,52,0.3,14,0.2],["核桃",20,666.666667,16.666667,13.333333,66.666667]],[["北豆腐",180,110,11,2,6],["虾仁",100,99,24,0,0.3],["熟米饭",280,130,2.7,28,0.3],["小白菜",200,13,1.5,2.2,0.2],["毛豆",80,121,12,9,5],["芝麻油",10,884,0,0,100]]],[[["Oikos 香草酸奶",100,58.823529,10,4.117647,0],["CARBmaster 牛奶",200,33.333333,5.416667,2.916667,0],["Premier Protein 麦片",42,428.571429,47.619048,33.333333,11.904762],["奇亚籽",12,500,20,33.333333,33.333333],["香蕉",100,89,1.1,22.8,0.3],["蓝莓",80,57,0.7,14.5,0.3],["小番茄",100,18,0.9,3.9,0.2],["核桃",15,666.666667,16.666667,13.333333,66.666667]],[["火鸡肉末",150,170,20,0,9],["熟全麦意面",250,150,6,30,1],["番茄酱",150,45,1.5,9,0.5],["菠菜",150,23,2.9,3.6,0.4],["橄榄油",12,884,0,0,100]],[["原味贝果",90,270,10,53,1.5],["香蕉",100,89,1.1,22.8,0.3]],[["西冷牛排",170,165,23,0,8],["土豆",400,77,2,17,0.1],["四季豆",200,31,1.8,7,0.2],["蘑菇",150,22,3.1,3.3,0.3],["橄榄油",15,884,0,0,100],["橙子",150,47,0.9,12,0.1]]],[[["Oikos 香草酸奶",100,58.823529,10,4.117647,0],["CARBmaster 牛奶",200,33.333333,5.416667,2.916667,0],["Premier Protein 麦片",42,428.571429,47.619048,33.333333,11.904762],["奇亚籽",12,500,20,33.333333,33.333333],["香蕉",100,89,1.1,22.8,0.3],["蓝莓",80,57,0.7,14.5,0.3],["小番茄",100,18,0.9,3.9,0.2],["核桃",15,666.666667,16.666667,13.333333,66.666667]],[["鳕鱼",170,82,18,0,0.7],["熟米饭",280,130,2.7,28,0.3],["西兰花",200,34,2.8,7,0.4],["红薯",200,86,1.6,20,0.1],["橄榄油",15,884,0,0,100]],[["全麦面包",80,250,12,44,4],["香蕉",120,89,1.1,22.8,0.3],["花生酱",15,590,25,20,50]],[["去皮鸡腿肉",180,145,20,0,6],["熟米饭",270,130,2.7,28,0.3],["小白菜",200,13,1.5,2.2,0.2],["胡萝卜",100,41,1,10,0.2],["芝麻油",12,884,0,0,100]]],[[["Oikos 香草酸奶",100,58.823529,10,4.117647,0],["CARBmaster 牛奶",200,33.333333,5.416667,2.916667,0],["Premier Protein 麦片",42,428.571429,47.619048,33.333333,11.904762],["奇亚籽",12,500,20,33.333333,33.333333],["香蕉",100,89,1.1,22.8,0.3],["蓝莓",80,57,0.7,14.5,0.3],["小番茄",100,18,0.9,3.9,0.2],["核桃",15,666.666667,16.666667,13.333333,66.666667]],[["鸡胸肉",140,165,31,0,3.6],["熟米饭",300,130,2.7,28,0.3],["牛油果",80,160,2,8.5,15],["西兰花",200,34,2.8,7,0.4],["橄榄油",10,884,0,0,100]],[["原味贝果",90,270,10,53,1.5],["香蕉",100,89,1.1,22.8,0.3],["蜂蜜",10,304,0,82,0]],[["瘦牛肉",160,165,23,0,8],["熟米饭",300,130,2.7,28,0.3],["彩椒",150,31,1,6,0.3],["蘑菇",150,22,3.1,3.3,0.3],["橄榄油",15,884,0,0,100],["猕猴桃",100,61,1.1,15,0.5]]],[[["Oikos 香草酸奶",100,58.823529,10,4.117647,0],["CARBmaster 牛奶",200,33.333333,5.416667,2.916667,0],["Premier Protein 麦片",42,428.571429,47.619048,33.333333,11.904762],["奇亚籽",12,500,20,33.333333,33.333333],["香蕉",100,89,1.1,22.8,0.3],["蓝莓",80,57,0.7,14.5,0.3],["小番茄",100,18,0.9,3.9,0.2],["核桃",15,666.666667,16.666667,13.333333,66.666667]],[["三文鱼",150,208,20,0,13],["熟藜麦",250,120,4.4,21,1.9],["芦笋",200,20,2.2,4,0.1],["胡萝卜",150,41,1,10,0.2],["橄榄油",10,884,0,0,100]],[["全麦面包",100,250,12,44,4],["苹果",180,52,0.3,14,0.2],["杏仁",20,579,21,22,50]],[["鸡胸肉",100,165,31,0,3.6],["北豆腐",150,110,11,2,6],["熟面条",300,138,5,25,2],["小白菜",200,13,1.5,2.2,0.2],["蘑菇",150,22,3.1,3.3,0.3],["芝麻油",10,884,0,0,100]]],[[["Oikos 香草酸奶",100,58.823529,10,4.117647,0],["CARBmaster 牛奶",200,33.333333,5.416667,2.916667,0],["Premier Protein 麦片",42,428.571429,47.619048,33.333333,11.904762],["奇亚籽",12,500,20,33.333333,33.333333],["香蕉",100,89,1.1,22.8,0.3],["蓝莓",80,57,0.7,14.5,0.3],["小番茄",100,18,0.9,3.9,0.2],["核桃",15,666.666667,16.666667,13.333333,66.666667]],[["虾仁",150,99,24,0,0.3],["熟全麦意面",300,150,6,30,1],["小番茄",150,18,0.9,3.9,0.2],["菠菜",150,23,2.9,3.6,0.4],["橄榄油",20,884,0,0,100]],[["全麦面包",80,250,12,44,4],["花生酱",25,590,25,20,50],["香蕉",120,89,1.1,22.8,0.3]],[["去皮鸡腿肉",170,145,20,0,6],["红薯",350,86,1.6,20,0.1],["西兰花",200,34,2.8,7,0.4],["牛油果",70,160,2,8.5,15],["橄榄油",10,884,0,0,100]]]];const NAMES=['早餐','午餐','加餐','晚餐'],TIMES=['08:30','12:30','16:30','19:30'],TARGET=[2500,135,320,75];let date='',meal=0;const K='nutrition-tracker-v1';let db={};try{db=JSON.parse(localStorage.getItem(K)||'{}')}catch{};const $=id=>document.getElementById(id),round=n=>Math.round(n*10)/10;
 function indexDay(s){let d=new Date(s+'T12:00:00');return(d.getDay()+6)%7}function defaultFoods(){return PLAN[indexDay(date)][meal].map(a=>[...a])}function getFoods(){return db[date]?.[meal]||defaultFoods()}function saveFoods(a){db[date]??={};db[date][meal]=a;localStorage.setItem(K,JSON.stringify(db));render()}
 function macros(a){let x=[0,0,0,0];(a||[]).forEach(f=>{for(let i=0;i<4;i++)x[i]+=Number(f[1]||0)*Number(f[i+2]||0)/100});return x.map(round)}
@@ -119,4 +119,200 @@ function downloadData(){let a=document.createElement('a');a.href=URL.createObjec
 function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let v=JSON.parse(r.result);if(!v.entries||!confirm('合并导入备份数据？同日期将被覆盖。'))return;db={...db,...v.entries};if(v.reviews){reviews={...reviews,...v.reviews};reviewSave()}if(v.extra){extra={...extra,...v.extra};xSave()}if(v.water){water={...water,...v.water};waterSave()}if(v.mealTimes){mealTimes={...mealTimes,...v.mealTimes};localStorage.setItem(MT_KEY,JSON.stringify(mealTimes))}localStorage.setItem(K,JSON.stringify(db));render()}catch{alert('备份文件无法识别')}};r.readAsText(f)}
 function copySummary(){let lines=['实际饮食记录（未记录的餐次不要按已吃计算）：'];for(let s of Object.keys(db).sort().reverse().slice(0,7)){lines.push(s);for(let [i,a] of Object.entries(db[s]))lines.push(NAMES[i]+' '+(mealTimes[s]?.[i]||'进食时间未记录')+' '+a.map(f=>f[0]+f[1]+'g').join('、')+'；P/C/F/热量='+macros(a).join('/'))}for(let s of Object.keys(extra).sort().reverse().slice(0,7)){lines.push('额外进食 '+s);for(let z of extra[s])lines.push(z.time+' '+z.name+' '+z.grams+'g，热量/P/C/F='+z.values.map(v=>round(v*z.grams/100)).join('/'))}for(let s of Object.keys(water).sort().reverse().slice(0,7)){let w=water[s];lines.push('饮水 '+s+' '+w.logs.reduce((a,x)=>a+x.ml,0)+'/'+w.goal+'mL（'+w.mode+'）')}let t=lines.join('\n');navigator.clipboard?.writeText(t).then(()=>alert('已复制，粘贴到 ChatGPT 即可')).catch(()=>prompt('复制以下内容',t))}
 $('xDate').addEventListener('change',xRender);let now=new Date();$('xTime').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');let y=now.getFullYear(),m=String(now.getMonth()+1).padStart(2,'0'),dd=String(now.getDate()).padStart(2,'0');setDay(y+'-'+m+'-'+dd);$('date').addEventListener('change',e=>setDay(e.target.value));
+(() => {
+  if (location.protocol !== 'https:') return;
+
+  const baseKey = 'nutrition-sync-base-v1';
+  const backupKey = 'nutrition-sync-local-backup-v1';
+  const tokenKey = 'nutrition-sync-token-v1';
+  const fields = {entries: K, reviews: REVIEW_KEY, extra: XKEY, water: WATER_KEY, mealTimes: MT_KEY};
+  const names = Object.keys(fields);
+  const panel = document.createElement('section');
+  panel.className = 'card';
+  panel.innerHTML = `
+    <details id="cloudSync">
+      <summary>云同步</summary>
+      <p class="hint" role="status" data-status></p>
+      <label>同步密钥 <input data-token type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <div class="flex">
+        <button type="button" class="btn" data-connect>连接</button>
+        <button type="button" class="btn light" data-stop>断开</button>
+        <button type="button" class="btn light" data-backup>下载同步前备份</button>
+      </div>
+      <div data-choices hidden>
+        <p class="hint">请选择要保留的版本。采用云端前会保存本机备份。上传本机前请先在另一台设备导出其记录。</p>
+        <button type="button" class="btn light" data-cloud>采用云端记录</button>
+        <button type="button" class="btn light" data-local>上传本机记录</button>
+      </div>
+    </details>`;
+  document.querySelector('main').prepend(panel);
+  const element = name => panel.querySelector('[data-' + name + ']');
+  const show = message => { element('status').textContent = message; };
+  const details = panel.querySelector('details');
+  const read = (storage, key, fallback) => JSON.parse(storage.getItem(key) ?? JSON.stringify(fallback));
+  const local = () => Object.fromEntries(names.map(name => [name, read(localStorage, fields[name], {})]));
+  const canonical = value => JSON.stringify(value, (_, item) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return item;
+    return Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]]));
+  });
+  const records = data => {
+    if (!data || ![1, 2, 3, 4, 5].includes(data.version) || !data.entries) {
+      throw new Error('云端备份格式无法识别');
+    }
+    return Object.fromEntries(names.map(name => {
+      const value = data[name] ?? {};
+      if (typeof value !== 'object' || Array.isArray(value)) throw new Error('云端备份格式无法识别');
+      return [name, value];
+    }));
+  };
+
+  let token = sessionStorage.getItem(tokenKey) || '';
+  let generation = 0;
+  let busy = false;
+  let pending = null;
+  let stale = false;
+
+  async function request(method, data, credential) {
+    const headers = {Authorization: 'Bearer ' + credential};
+    if (data) headers['Content-Type'] = 'application/json';
+    const response = await fetch('/api/sync', {
+      method, headers, body: data ? JSON.stringify(data) : undefined,
+      cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(12000)
+    });
+    if (response.status === 401) throw new Error('同步密钥无效，请重新输入');
+    if (response.status === 409) return null;
+    if (!response.ok) throw new Error('云同步暂不可用（' + response.status + '）');
+    const result = await response.json();
+    if (!Number.isSafeInteger(result.revision) || result.revision < 0) {
+      throw new Error('云端版本无法识别');
+    }
+    return result;
+  }
+
+  function remember(revision, snapshot) {
+    localStorage.setItem(baseKey, JSON.stringify({revision, snapshot}));
+    pending = null;
+    element('choices').hidden = true;
+    show('已同步 · 云端版本 ' + revision + '。页面打开时自动检查更新。');
+  }
+
+  function adopt(remote, snapshot) {
+    const previous = local();
+    localStorage.setItem(backupKey, JSON.stringify({version: 5, ...previous, drafts}));
+    try {
+      for (const name of names) localStorage.setItem(fields[name], JSON.stringify(snapshot[name]));
+      remember(remote.revision, canonical(snapshot));
+    } catch (error) {
+      for (const name of names) localStorage.setItem(fields[name], JSON.stringify(previous[name]));
+      throw error;
+    }
+    ({entries: db, reviews, extra, water, mealTimes} = snapshot);
+    render();
+  }
+
+  async function sync(choice) {
+    if (!token || busy || stale) return;
+    busy = true;
+    const active = generation;
+    const credential = token;
+    const selected = pending;
+    try {
+      const remote = await request('GET', null, credential);
+      if (active !== generation) return;
+      const current = local();
+      const snapshot = canonical(current);
+      const cloud = remote.revision === 0 ? null : records(remote.data);
+      const cloudSnapshot = cloud ? canonical(cloud) : null;
+      const base = read(localStorage, baseKey, null);
+      if (cloudSnapshot === snapshot) {
+        remember(remote.revision, snapshot);
+        return;
+      }
+      const explicit = choice && selected?.revision === remote.revision && selected.snapshot === snapshot;
+      const clean = base?.snapshot === snapshot;
+      const cloudUnchanged = base && base.revision === remote.revision &&
+        (remote.revision === 0 || base.snapshot === cloudSnapshot);
+      if ((explicit && choice === 'cloud' && cloud) || (!choice && !pending && clean && cloud && !cloudUnchanged)) {
+        const focused = document.activeElement;
+        if (!choice && focused?.matches('main input, main textarea, main select, [contenteditable="true"]')) {
+          show('有云端更新，完成当前输入后将自动读取。');
+          return;
+        }
+        adopt(remote, cloud);
+        return;
+      }
+      if ((explicit && choice === 'local') || (!choice && !pending && cloudUnchanged)) {
+        const data = {...remote.data, version: 5, ...current};
+        const written = await request('PUT', {revision: remote.revision, data}, credential);
+        if (active !== generation) return;
+        if (written) {
+          remember(written.revision, snapshot);
+          return;
+        }
+        pending = null;
+        element('choices').hidden = true;
+        show('云端版本刚刚更新，稍后会重新检查。');
+        return;
+      }
+      pending = {revision: remote.revision, snapshot};
+      element('choices').hidden = false;
+      element('cloud').disabled = !cloud;
+      details.open = true;
+      show('本机与云端版本 ' + remote.revision + ' 不同。已暂停上传，等待你选择。');
+    } catch (error) {
+      show(error instanceof TypeError || error.name === 'TimeoutError'
+        ? '网络暂不可用，记录已保留在本机。' : error.message);
+    } finally {
+      busy = false;
+    }
+  }
+
+  element('connect').onclick = () => {
+    if (busy || stale) return;
+    const value = element('token').value.trim();
+    if (!value) { show('请输入同步密钥。'); return; }
+    token = value;
+    sessionStorage.setItem(tokenKey, value);
+    element('token').value = '';
+    sync();
+  };
+  element('stop').onclick = () => {
+    generation++;
+    token = '';
+    pending = null;
+    sessionStorage.removeItem(tokenKey);
+    element('choices').hidden = true;
+    show('云同步已断开。');
+  };
+  element('cloud').onclick = () => {
+    if (confirm('采用云端记录？当前本机记录会另存为同步前备份。')) sync('cloud');
+  };
+  element('local').onclick = () => {
+    if (confirm('将当前本机记录上传为新的云端版本？')) sync('local');
+  };
+  element('backup').onclick = () => {
+    const backup = localStorage.getItem(backupKey);
+    if (!backup) { show('这台设备还没有同步前备份。'); return; }
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([backup], {type: 'application/json'}));
+    link.download = 'nutrition-before-sync.json';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  };
+  addEventListener('storage', event => {
+    if (event.storageArea !== localStorage || !Object.values(fields).includes(event.key)) return;
+    stale = true;
+    generation++;
+    details.open = true;
+    element('choices').hidden = true;
+    show('同一浏览器的另一标签页更新了记录。请关闭重复标签页并刷新。');
+  });
+  addEventListener('online', () => sync());
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) sync();
+  });
+  setInterval(() => { if (!document.hidden) sync(); }, 5000);
+  show(token ? '正在连接云端…' : '输入密钥后可启用云同步。');
+  if (token) sync();
+})();
 </script></body></html>
