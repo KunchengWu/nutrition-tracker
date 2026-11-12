@@ -208,6 +208,7 @@ $('xDate').addEventListener('change',xRender);let now=new Date();$('xTime').valu
     }
     ({entries: db, reviews, extra, water, mealTimes} = snapshot);
     render();
+    waterRender();
   }
 
   async function sync(choice) {
