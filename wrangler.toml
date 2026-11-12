@@ -1,0 +1,7 @@
+name = "nutrition-tracker"
+main = "sync/worker.js"
+compatibility_date = "2026-11-10"
+
+[assets]
+directory = "."
+run_worker_first = ["/api/*"]
